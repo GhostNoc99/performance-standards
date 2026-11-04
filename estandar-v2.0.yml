@@ -1,0 +1,123 @@
+# =============================================================
+# ESTÁNDAR DE PERFORMANCE v2.0 — fuente única de la tabla de derivación
+#
+# Quién lo lee: Jenkins (Jenkinsfile-unified) vía la librería standardUtils.
+# Cómo se versiona: cada cambio de valores = nuevo tag (v2.0.1, v2.1, v3.0).
+#   Los builds fijan el tag con el parámetro STANDARD_VERSION, así un
+#   resultado histórico siempre se puede reproducir con su estándar.
+# Regla: NO editar un tag ya publicado; crear uno nuevo.
+# =============================================================
+
+version: "2.0"
+
+# Valores que aplican a todos los perfiles salvo que el perfil los redefina
+defaults:
+  ramp_up_seconds: 60      # rampa inicial de la prueba (ramping-arrival-rate)
+  error_rate_max: 0.01     # fracción: 0.01 = 1 %
+  max_vus_factor: 2        # maxVUs = pre_alloc_vus * factor
+  # Límites de consumo de recursos durante la prueba (porcentaje).
+  # CPU: 100 = un núcleo completo del contenedor. Mem: % del límite del
+  # contenedor, o del total de la máquina si no tiene límite.
+  recursos:
+    cpu_max_pct: 80
+    mem_max_pct: 85
+
+# Combinaciones válidas. Si una combinación no está aquí, el pipeline falla
+# con un mensaje claro (no se asumen valores por omisión).
+perfiles:
+
+  - id: MICRO-BAJA-LECTURA-SQL
+    tipo_servicio: MICROSERVICIO
+    complejidad:   BAJA
+    operacion:     LECTURA
+    bd:            SQL_ONPREMISE
+    tps: 8
+    duracion: 10m
+    p95_ms: 2000
+    pre_alloc_vus: 24
+    datos_min: 500
+    mix: 100R
+
+  - id: MICRO-BAJA-LECTURA-NOSQL
+    tipo_servicio: MICROSERVICIO
+    complejidad:   BAJA
+    operacion:     LECTURA
+    bd:            NOSQL_NUBE
+    tps: 10
+    duracion: 10m
+    p95_ms: 1500
+    pre_alloc_vus: 30
+    datos_min: 500
+    mix: 100R
+
+  - id: MICRO-MEDIA-MIXTA-SQL
+    tipo_servicio: MICROSERVICIO
+    complejidad:   MEDIA
+    operacion:     MIXTA
+    bd:            SQL_ONPREMISE
+    tps: 15
+    duracion: 15m
+    p95_ms: 2000
+    pre_alloc_vus: 45
+    datos_min: 2000
+    mix: 70R30W
+
+  - id: MICRO-MEDIA-MIXTA-NOSQL
+    tipo_servicio: MICROSERVICIO
+    complejidad:   MEDIA
+    operacion:     MIXTA
+    bd:            NOSQL_NUBE
+    tps: 20
+    duracion: 15m
+    p95_ms: 1500
+    pre_alloc_vus: 60
+    datos_min: 2000
+    mix: 70R30W
+
+  - id: MICRO-ALTA-MIXTA-SQL
+    tipo_servicio: MICROSERVICIO
+    complejidad:   ALTA
+    operacion:     MIXTA
+    bd:            SQL_ONPREMISE
+    tps: 25
+    duracion: 20m
+    p95_ms: 2000
+    pre_alloc_vus: 75
+    datos_min: 5000
+    mix: 60R40W
+
+  - id: MICRO-ALTA-MIXTA-NOSQL
+    tipo_servicio: MICROSERVICIO
+    complejidad:   ALTA
+    operacion:     MIXTA
+    bd:            NOSQL_NUBE
+    tps: 30
+    duracion: 20m
+    p95_ms: 1500
+    pre_alloc_vus: 90
+    datos_min: 5000
+    mix: 60R40W
+
+  - id: ORQ-MEDIA-ORQUESTADA-SQL
+    tipo_servicio: ORQUESTADOR
+    complejidad:   MEDIA
+    operacion:     ORQUESTADA
+    bd:            SQL_ONPREMISE
+    tps: 10
+    duracion: 15m
+    p95_ms: 4000
+    pre_alloc_vus: 40
+    datos_min: 2000
+    mix: N/A
+
+  - id: ORQ-ALTA-ORQUESTADA-NOSQL
+    tipo_servicio: ORQUESTADOR
+    complejidad:   ALTA
+    operacion:     ORQUESTADA
+    bd:            NOSQL_NUBE
+    tps: 18
+    duracion: 20m
+    p95_ms: 4000
+    pre_alloc_vus: 72
+    datos_min: 5000
+    mix: N/A
